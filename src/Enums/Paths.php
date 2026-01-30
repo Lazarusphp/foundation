@@ -4,7 +4,7 @@ namespace LazarusPhp\Foundation\Enums;
 enum Paths:string
 {
     case Root = "root";
-    case App = "App";
-    case Routes = "Routes";
-    case Storage = "Storage";
+    case App = "app";
+    case Routes = "routes";
+    case Storage = "storage";
 }
