@@ -4,11 +4,13 @@ namespace LazarusPhp\Foundation;
 use LazarusPhp\Foundation\Enums\Paths;
 use LogicException;
 
-class PathResolver
+final class PathResolver
 {
     private static array $map = [];
     public static string $root;
     private static bool $initialized = false;
+
+    private static array $restricted = ["vendor"];
 
     public static function init($basedir,$levels = 1)
     {
@@ -23,8 +25,34 @@ class PathResolver
         self::$initialized = true;
     }
 
+    private static function getRestrictedPaths($path)
+    {
+        foreach(self::$restricted as $restricted)
+        {
+            if(str_starts_with($path,self::$root.DIRECTORY_SEPARATOR.$restricted))
+            {
+                throw new LogicException("Path : $path is Restricted and cannot be used");   
+            }
+        }
+    }
 
-    
+    public static function remove(string $key)
+    {
+        $key = strtolower($key);
+        foreach(Paths::cases() as $case)
+        {
+            if($case->value === $key)
+            {
+                throw new LogicException("Cannot Remove Reserved Paths");
+            }
+        }
+        // Check if the key Exists and Delete
+        if(isset(self::$map[$key]))
+        {
+            unset(self::$map[$key]);
+        }
+    }
+
     public static function get(Paths | string $key)
     {
     // Validate if Key is part of the Paths Enum;
@@ -43,8 +71,8 @@ class PathResolver
     {
        self::isInitialized();
        self::isReserverved($name);
-    
-       self::$map[$name] = self::resolve($path);
+        self::getRestrictedPaths($path);      
+        self::$map[$name] = self::resolve($path);
     }
 
     private static function resolve(string $path)
