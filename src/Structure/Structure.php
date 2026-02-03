@@ -4,11 +4,6 @@ namespace LazarusPhp\Foundation;
 final class Structure
 {
 
-    private string $directory = "";
-
-
-
-
     /**
      * @method isFile
      * Detect if is a file
@@ -42,4 +37,5 @@ final class Structure
     {
         return (bool) is_dir($path) ? true : false;
     }
+
 }
