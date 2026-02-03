@@ -7,7 +7,9 @@ use LogicException;
 final class Posix implements LinuxFsInterface
 {
     protected $username;
+    protected $group;
     protected $groups;
+    
     protected array $modes = 
     [
         '0755' => 0755,
@@ -19,9 +21,15 @@ final class Posix implements LinuxFsInterface
         '0664' => 0664,
     ];
 
-    public function hasUsername(?string $username="")
+    public function setCredentials(string $username,string $group):void
     {
-        $username = empty($username) ? env("www_username") : $username;
+        $this->username = $username;
+        $this->group = $group;
+    }
+
+    public function hasUsername()
+    {
+        $username = ($this->username) ? env("www_username") : $this->username;
         $username = posix_getpwnam($username);
 
         if($username === false)
@@ -34,10 +42,10 @@ final class Posix implements LinuxFsInterface
         
     }
 
-        public function hasGroup(string $group=""):bool
-    {
+        public function hasGroup():bool
+        {   
         $username = $this->username;
-        $group = (empty($group)) ? env("www_group") : $group;
+        $group = (!$this->group) ? env("www_group") : $this->group;
         
         // Check in Primary
         if($this->hasGroup($this->username,$group) === true ||

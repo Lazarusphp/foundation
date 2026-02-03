@@ -44,20 +44,9 @@ class Permissions
         return is_readable($path) ? true : false;
     }
 
-    public function validateUser(string $username="",string $group="")
-    {
-        $user = $this->linux_fs_interface->hasUsername($username);
-        if($this->linux_fs_interface->hasGroup($group)===true)
-            {
-                echo "Authenticated";
-            }
-            else
-                {
-                    echo "failed";
-                }
-    }
 
-    public function getPermissions($path)
+
+    public function hasPermissions($path)
     {
         return $this->linux_fs_interface->getPermissions($path);
     }
