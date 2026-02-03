@@ -8,10 +8,4 @@ enum Paths:string
     case Routes = "Routes";
     case Config = "Config";
     case Storage = "Storage";
-
-    
-    public function label()
-    {
-        return (string) $this->name;
-    }
 }
