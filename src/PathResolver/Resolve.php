@@ -12,9 +12,11 @@ final class Resolve
 
     private static array $restricted = ["vendor"];
 
-    public static function init($basedir,$levels = 1)
+    public static function init($basedir,$levels = 0)
     {
-        self::$root = dirname($basedir,$levels);
+    
+        // check basename if levels have been Called
+        self::$root = ($levels > 0) ? dirname($basedir,$levels) : realpath($basedir);
 
         self::$map = [
             "Root"=>self::$root,
