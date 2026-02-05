@@ -18,28 +18,28 @@ class Permissions
         }
         else
         {
-            echo "We Will use SHell";
+        // Setup to use Shell Exec
         }
     }
 
     private int $mode = 0;
-    private array $modes = [0600, 0644, 0664, 0700, 0755, 0777];
+    private static array $modes = [0600, 0644, 0664, 0700, 0755, 0777];
 
-    protected function validMode(int $mode)
+    public static function validMode(int $mode)
     {
-        if (in_array($mode, $this->modes)) {
+        if (in_array($mode, self::$modes)) {
             return true;
         } else {
             return false;
         }
     }
 
-    public function writable(string $path)
+    public static function writable(string $path)
     {
         return is_writable($path) ? true : false;
     }
 
-    public function readable(string $path)
+    public static function readable(string $path)
     {
         return is_readable($path) ? true : false;
     }
@@ -51,14 +51,5 @@ class Permissions
         return $this->linux_fs_interface->getPermissions($path);
     }
 
-    public function setPermissions(string $path, int $permissions = 0755)
-    {
-        
-    }
 
-    public function getFilePerms($filename)
-    {
-        $perms = stat(fileperms($filename));
-        return $perms;
-    }
 }

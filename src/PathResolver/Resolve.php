@@ -14,7 +14,6 @@ final class Resolve
 
     public static function init($basedir,$levels = 0)
     {
-    
         // check basename if levels have been Called
         self::$root = ($levels > 0) ? dirname($basedir,$levels) : realpath($basedir);
 
