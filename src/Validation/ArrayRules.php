@@ -7,6 +7,10 @@ final class ArrayRules
 {
 
     private array|string|int|null $key = null;
+    private array|string|int|null $in = null;
+
+    private static array $invalidKeys = [];
+    private static array $invalidValues = [];
 
     public static function create():self
     {
@@ -16,6 +20,23 @@ final class ArrayRules
     public static function is($value):bool
     {
         return is_array($value);
+    }
+
+    public static function inArray(array|string|int $values, array $array):bool
+    {
+        if(is_array($values))
+        {
+            foreach($values as $value)
+            {
+                if (!in_array($value, $array, true)) 
+                {
+                    return false;
+                }            
+            }
+            return true;
+        }
+
+        return in_array($values,$array);
     }
 
 public static function hasKeys(array|string|int $keys, array $array):bool
@@ -36,6 +57,7 @@ public static function hasKeys(array|string|int $keys, array $array):bool
         {
             throw new LogicException("Key has already been Set");
         }
+
         $this->key = $key;
         return $this;
     }
@@ -51,8 +73,13 @@ public static function hasKeys(array|string|int $keys, array $array):bool
         {
             throw new LogicException("Key is not part of the selected Array");
         }
-        
+
         return true;
     }
 
+    public function in(string|int|array $value)
+    {
+        $this->in = $value;
+        return $this;
+    }
 }
