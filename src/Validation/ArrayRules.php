@@ -20,6 +20,13 @@ final class ArrayRules
     private array $invalidValues = [];
 
 
+    // ---- constructor --- /
+
+    public function __construct()
+    {
+        $this->reset();
+    }
+
 
     // ---- Static Method  Entry Points ---- //
 
@@ -87,7 +94,7 @@ final class ArrayRules
     {
         if(!$this->isArray($value))
         {
-            throw new LogicException("Validation Failed : Value Must be an array");
+            throw new LogicException("Validation Failed : Value Must be an array" .gettype($value)." Used");
         }
 
         if($this->values !== null  && !$this->validateValues($this->values,$value))
@@ -99,8 +106,6 @@ final class ArrayRules
         {
             throw new LogicException("Key or keys : ".implode(", ",$this->invalidKeys)." is not part of the selected Array");
         }
-        
-        $this->reset();
         return true;
     }
 
