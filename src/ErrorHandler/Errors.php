@@ -1,5 +1,5 @@
 <?php 
-namespace LazarusPhp\ErrorHandler;
+namespace LazarusPhp\Foundation\ErrorHandler;
 
 final class Errors
 {
@@ -7,7 +7,7 @@ final class Errors
 
 
 
-    public function __construct()
+    public function __construct(array $errors)
     {
         $this->errors = [];
     }
@@ -22,13 +22,9 @@ final class Errors
         return count($this->errors);
     }
 
-    public function returnErrors():array|bool
+    public function listErrors():array
     {
-        if($this->hasErrors())
-        {
-            return $this->errors;   
-        }
-        return false;
+        return $this->errors;
     }
 
     public function resetErrors()
