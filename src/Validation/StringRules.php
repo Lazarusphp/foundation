@@ -2,9 +2,10 @@
 
 namespace LazarusPhp\Foundation\Validation;
 
+
 use LogicException;
 use LazarusPhp\Foundation\Validation\Enums\StringCases;
-
+use LazarusPhp\Foundation\ErrorHandler\Errors;
 
 
 final class StringRules
@@ -12,12 +13,23 @@ final class StringRules
 
     protected int $min = 0;
     protected int $max = PHP_INT_MAX;
+    private object $errors;
     protected ?StringCases $case = null;
 
-    public static function create()
+    public function __construct(?array $errors=null)
     {
-        return new self();
+        if(!is_null($errors) && is_array($errors))
+        {
+            echo "Arrays Found";
+        }
     }
+
+    public static function create(?array $errors=null)
+    {
+        $errors = (is_array($errors)) ? $errors : null;
+        return new self($errors);
+    }
+
 
     public static function is(mixed $value): bool
     {
@@ -38,9 +50,6 @@ final class StringRules
     {
         return substr($string, $min, $max);
     }
-
-
-
 
     public function min(int $min)
     {
@@ -118,7 +127,7 @@ final class StringRules
     }
 
     private function applyCase($string)
-    {;
+    {
         return match($this->case)
         {
             StringCases::LOWER => mb_strtolower($string),
@@ -128,4 +137,5 @@ final class StringRules
             null => $string,
         };
     }
+
 }
