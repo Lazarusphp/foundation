@@ -1,9 +1,6 @@
 <?php
 namespace LazarusPhp\Foundation\Validation;
 
-use App\Listeners\InvalidInputListener;
-use LazarusPhp\Exceptions\Dispatcher;
-use App\Exceptions\InvalidInputException;
 use LogicException;
 
 class FormRules
@@ -18,7 +15,6 @@ class FormRules
 
     public function __construct()
     {
-        Dispatcher::registerListener([InvalidInputListener::class]);
         $this->reset();
     }
 
@@ -65,7 +61,7 @@ class FormRules
     {
         if($this->requiredValue !== null && !$this->validteRequired($input))
         {
-            throw new InvalidInputException("Required Field");
+        
         }
 
         if($this->matchValue !== null)
