@@ -2,54 +2,38 @@
 
 namespace LazarusPhp\Foundation\Validation;
 
-
 use LogicException;
 use LazarusPhp\Foundation\Validation\Enums\StringCases;
 use LazarusPhp\Foundation\ErrorHandler\Errors;
-
 
 final class StringRules
 {
 
     protected int $min = 0;
     protected int $max = PHP_INT_MAX;
-    private object $errors;
+    private Errors $errors;
     protected ?StringCases $case = null;
 
-    public function __construct(?array $errors=null)
+    public function __construct(?Errors $errors=null)
     {
-        if(!is_null($errors) && is_array($errors))
-        {
-            echo "Arrays Found";
-        }
+            $this->errors = $errors ?? new Errors();
     }
 
-    public static function create(?array $errors=null)
+    public static function create(?Errors $errors=null)
     {
-        $errors = (is_array($errors)) ? $errors : null;
-        return new self($errors);
+        return new self(new Errors($errors));
     }
 
-
-    public static function is(mixed $value): bool
-    {
-        return is_string($value) ? true : false;
-    }
-
-    public static function minLength(string $string, int $min): bool
+    public function minLength(string $string, int $min): bool
     {
         return (mb_strlen($string) >= $min) ? true : false;
     }
 
-    public static function maxLength(string $string, int $max): bool
+    public function maxLength(string $string, int $max): bool
     {
         return mb_strlen($string) <= $max ? true : false;
     }
 
-    public  static function subString(string $string, $min, $max)
-    {
-        return substr($string, $min, $max);
-    }
 
     public function min(int $min)
     {
@@ -63,79 +47,35 @@ final class StringRules
         return $this;
     }
 
+    public function error(string $key)
+    {
+        return $this->errors->get($key);
+    }
+
+    public function errors():array
+    {
+        return $this->errors->all();
+    }
+
     public function validate(string $string):bool
     {
-        if (!self::is($string)) {
-            throw new LogicException("Validation Failed  : Value is not a string");
+
+        $this->errors->reset();
+        if($this->min > $this->max)
+        {
+                $this->errors->add("config","Minimum Value cannot be larger than Max Value");
         }
-        
-        $string = $this->applyCase($string);
-       
-        if ($this->min > 0 && !self::minLength($string, $this->min)) {
-            throw new LogicException("Value does not meet the Minimum character length of {$this->min}");
+
+        if ($this->min > 0 && !$this->minLength($string, $this->min)) {
+            $this->errors->add("min","Value $string  does not meet Minimum Requirements of {$this->min} Charcters");
         }
 
         // Only enforce max if max < PHP_INT_MAX
-        if ($this->max < PHP_INT_MAX && !self::maxLength($string, $this->max)) {
-            throw new LogicException("Value exceeds the Maximum character length of {$this->max}");
+        if ($this->max < PHP_INT_MAX && !$this->maxLength($string, $this->max)) {    
+            $this->errors->add("max","{$string} Exceeds Maxium Required value of {$this->max}");
         }
 
-        return true;
-    }
-
-    private function setCase(StringCases $stringcase)
-    {
-        if($this->case !== null)
-        {
-            throw new LogicException("A Method has alreay been set ");
-        }
-
-        $this->case = $stringcase;
-        return $this;
-    }
-
-    public function upper()
-    {
-        $this->setCase(StringCases::UPPER);
-        return $this;
-    }
-
-    public function lower()
-    {
-        $this->setCase(StringCases::LOWER);
-        return $this;
-    }
-
-    public function lcFirst()
-    {
-        $this->setCase(StringCases::LCFIRST);
-        return $this;
-    }
-
-        public function ucFirst()
-    {
-        $this->setCase(StringCases::UCFIRST);
-        return $this;
-    }
-
-    private function mblclower(string $string):string
-    {
-        $first = mb_substr($string,0,1);
-        $rest = mb_substr($string,1);
-        return mb_strtolower($first) . $rest;
-
-    }
-
-    private function applyCase($string)
-    {
-        return match($this->case)
-        {
-            StringCases::LOWER => mb_strtolower($string),
-            StringCases::UPPER => mb_strtoupper($string),
-            StringCases::UCFIRST => mb_convert_case($string,MB_CASE_TITLE),
-            StringCases::LCFIRST=> $this->mblclower($string),
-            null => $string,
-        };
+            return ($this->errors->count()) ? false : true;    
     }
 
 }
