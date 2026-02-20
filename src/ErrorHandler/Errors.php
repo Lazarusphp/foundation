@@ -1,35 +1,41 @@
 <?php 
 namespace LazarusPhp\Foundation\ErrorHandler;
 
-final class Errors
+use LogicException;
+
+class Errors
 {
     private array $errors = [];
 
-
-
-    public function __construct(array $errors)
-    {
-        $this->errors = [];
+    public function add(string $key, string $message): void
+    {        
+        $this->errors[$key] = $message;
     }
 
-    public function addError($error)
+    public function reset()
     {
-        $this->errors[] = $error;
+            $this->errors = [];
     }
 
-    public function hasErrors():int
+
+    public function has(string $key):bool
     {
-        return count($this->errors);
+        return (array_key_exists($key,$this->errors));
+    }    
+
+    public function get(?string $key)
+    {
+        return $this->errors[$key] ?? null;
     }
 
-    public function listErrors():array
+    public function all():array
     {
         return $this->errors;
     }
 
-    public function resetErrors()
-    {
-        $this->errors = [];
-    }
 
+    public function count():int
+    {
+        return count($this->errors);
+    }
 }
