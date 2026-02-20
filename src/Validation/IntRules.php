@@ -5,27 +5,27 @@ namespace LazarusPhp\Foundation\Validation;
 use Exception;
 use LogicException;
 use LazarusPhp\Foundation\ErrorHandler\Errors;
+use LazarusPhp\Foundation\Validation\Traits\ErrorTrait;
+use LazarusPhp\Foundation\Validation\Traits\IntegerTraits;
 
 class IntRules
 {
 
     // ---- Properties ---- //
 
-    private int|null $minValue = null;
-    private int|null $maxValue = null;
     private int|null $matchValue = null;
-    private int|null $randomValue = null;
     private Errors $errors;
-
+    use ErrorTrait;
+    use IntegerTraits;
 
 
 
 
     // ---- Contructor ---- //
 
-    public function __construct($errors)
+    private function __construct($errors)
     {
-        $this->errors = $error;
+        $this->errors = $errors;
         $this->reset();
     }
 
@@ -38,107 +38,61 @@ class IntRules
         return new self($errors);
     }
 
-    public function random(int $min,int $max):int
-    {
-        return rand($min,$max);
-    }
 
-
-
-    public function min(int $value)
-    {
-        if($this->minValue !== null)
-        {
-            throw new LogicException("Minimum Method Has Been set");
-        }
-
-        $this->minValue = $value;
-        return $this;
-    }
-
-    public function max(int $value)
-    {
-
-        if($this->maxValue !== null)
-        {
-            throw new LogicException("Maximum Method has Been set ALready");
-        }
-
-        $this->maxValue = $value;
-        return $this;
-    }
-
-    public function match(int $value)
+    public function match(int $value):self
     {
 
         if($this->matchValue !== null)
         {
-            throw new LogicException("Match Method has Been set ALready");
+            $this->errors->add("logic","Match Method has Been set ALready");
         }
 
         $this->matchValue = $value;
         return $this;
     }
 
-    public function validate($value):bool {
+    public function validate(int $value):bool {
         
-        $min = $this->minValue ?? null;
-        $max = $this->maxValue ?? null;
+        $this->clearErrors();
         $match = $this->matchValue ?? null;
-        $random = $this->randomValue ?? null;
-
-
-        if(!$this->isInt($value))
+   
+        if($this->minValue !== null && !$this->validateMin($this->minValue,$value))
         {
-            throw new LogicException("Value $value is not an integer, ".gettype($value)." has been used");
-        }
-
-     
-
-
-        if($min !== null && !$this->ValidateMin($min,$value))
-        {
-            throw new LogicException("Value : $value is lower than Minumum value $min");
+            $this->errors->add("min","Value : $value is lower than Minumum value $this->minValue");
         }
         
 
-        if($max !== null && !$this->ValidateMax($max,$value))
+        if($this->maxValue !== null && !$this->validateMax($this->maxValue,$value))
         {
-            throw  new LogicException("Value : $value is greater than the Maximum value $max");
+            $this->errors->add("max","Value : $value is greater than the Maximum value $this->maxValue");
         }
 
-        if($match !== null && !$this->ValidateMatch($match,$value))
+        if($match !== null && !$this->validateMatch($match,$value))
         {
-            throw  new LogicException("Value $value does not match expected $match");
+            $this->errors->add("match","Value $value does not match expected $match");
         }
 
-
-        return true;
-
+        return $this->isValid();
+       
     }
 
 
     // ---- Private Functions ---- //
 
-    private function isInt($value): bool
-    {
-        return is_int($value);
-    }
-
-    private function ValidateMin(int $min,$value):bool
+    private function validateMin(int $min,$value):bool
     {
         return $value >= $min;    
     }
 
     
 
-    private function ValidateMatch($match,$value)
+    private function validateMatch($match,$value)
     {
         return $match === $value;
     }
 
 
-    private function ValidateMax(int $max , int $value):bool
+    private function validateMax(int $max , int $value):bool
     {
         return $value <= $max;
     }
@@ -148,7 +102,6 @@ class IntRules
     {
         $this->minValue = null;
         $this->maxValue = null;
-        $this->randomValue = null;
         $this->matchValue = null;
         return $this;
     }
