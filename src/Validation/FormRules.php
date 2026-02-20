@@ -1,6 +1,8 @@
 <?php
 namespace LazarusPhp\Foundation\Validation;
 
+use LazarusPhp\Foundation\ErrorHandler\Errors;
+use LazarusPhp\Foundation\Validation\Traits\ErrorTrait;
 use LogicException;
 
 class FormRules
@@ -10,81 +12,127 @@ class FormRules
 
     private bool|null $requiredValue = null;
     private string|int|null $matchValue = null;
+    private array $requestMethod = [];
+    private Errors $errors;
+    use ErrorTrait;
 
     // ---- Constructor ---- //
 
-    public function __construct()
+    private function __construct($errors)
     {
+        $this->errors = $errors;
+        $this->detectMethod();
         $this->reset();
     }
 
-    // ---- Static Instantiation ---- //
-
-    public static function create()
+    public static function create(?Errors $errors = null)
     {
-        return new self();
+        $errors = $errors ?? new Errors();
+        return new self($errors);
     }
 
-    // ---- Public Methods ---- //
-
-    public function required():self
+    public function matches($input)
     {
-        if($this->requiredValue !== null)
+        
+
+        if($this->matchValue !== null)
         {
-            throw new LogicException("Required has Already Been Set");
+            throw new LogicException("Logic Exception : ".__FUNCTION__." has Been Used Already");
+        }
+        else{
+            $this->matchValue = $input;
+        }
+        return $this;
+    }
+
+
+ private function validateMatch($input): bool
+{
+    return isset(
+        $this->requestMethod[$this->matchValue],
+        $this->requestMethod[$input]
+    ) && $this->requestMethod[$this->matchValue] === $this->requestMethod[$input];
+
+}
+
+    public function required()
+    {
+        if ($this->requiredValue !== null) {
+            throw new LogicException("required() has already been set");
         }
 
         $this->requiredValue = true;
         return $this;
     }
 
-    public function match(string|int $input):self
+private function validateRequired($input): bool
+{
+    return isset($this->requestMethod[$input])
+        && trim((string)$this->requestMethod[$input]) !== '';
+}
+
+
+    public function submit($name)
     {
-        $this->matchValue = $input;
-        return $this;
+        return isset($this->requestMethod[$name]) ? true : false;
     }
 
-    public function reset():self
-    {
-        // Nulify All Values here;
 
-        $properties = get_object_vars($this);
-
-        foreach($properties as $property => $value)
-        {       
-                $this->{$property} = null;
+    public function validate(string $input)
+    {  
+    
+        if ($this->matchValue === $input) {
+            throw new LogicException("Field cannot match itself");
         }
-        return $this;
-    }
 
-    public function validate($input)
-    {
-        if($this->requiredValue !== null && !$this->validteRequired($input))
-        {
+        if ($this->matchValue && !$this->validateRequest($this->matchValue)) {
+            throw new LogicException("Field {$this->matchValue} does not exist");
+        }
+
+        if (!$this->validateRequest($input)) {
+            throw new LogicException("Field $input does not exist");
+        }
         
-        }
-
-        if($this->matchValue !== null)
+        if($this->requiredValue && !$this->validateRequired($input))
         {
-            echo "WE will attempt to match";
+            throw new LogicException("The Field $input is Required");
         }
-        return true;
-    }
 
-
-    // --- Private Setters Methods ---- //
-
-    private function validteRequired($input):bool
-    {   
-        if($this->requiredValue === true && empty($input))
-        {   
-            return false;
+        if($this->matchValue !== null && !$this->validateMatch($input))
+        {
+            throw new LogicException("$input Must match {$this->matchValue}");
         }
-        return true;
+
+        $this->reset();
+        return $this->isValid();
+    }
+    public function detectMethod()
+    {
+        $this->requestMethod = ($_SERVER["REQUEST_METHOD"] === "POST") ? $_POST:$_GET; 
     }
 
-    public function validateMatch($input)
-    { 
-        // validate Both Inputs.
+    public function request(string $name)
+    {
+        return ($this->validateRequest($name)) ?  $this->requestMethod[$name] : "";
     }
+
+
+    public function validateRequest(string $name):bool
+    {
+        if(!isset($this->requestMethod[$name]))
+        {
+          return false;
+        }
+        // 
+        return true;
+     
+    }
+
+    private function reset()
+    {
+        // Work on this later
+        $this->requiredValue = null;
+        $this->matchValue = null;
+    }
+
 }
