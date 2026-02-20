@@ -1,11 +1,14 @@
 <?php
 namespace LazarusPhp\Foundation\Validation;
 
-use LogicException;
+use LazarusPhp\Foundation\ErrorHandler\Errors;
+use LazarusPhp\Foundation\Validation\Traits\ErrorTrait;
 
 final class ArrayRules
 {
 
+    use ErrorTrait;
+    private Errors $errors;
 
 
 // ---- Properties ---- //
@@ -20,10 +23,12 @@ final class ArrayRules
     private array $invalidValues = [];
 
 
+
     // ---- constructor --- /
 
-    public function __construct()
+    private function __construct($errors)
     {
+        $this->errors = $errors;
         $this->reset();
     }
 
@@ -34,53 +39,39 @@ final class ArrayRules
      /**
       *  public method used as an entry point.
       *  @method create()
-      *  @static
-      *  @return self
+      * @return self
       */
 
-    public static function create():self
+    public static function create(?Errors $errors = null): self
     {
-        return new self();
+        $errors = $errors ?? new Errors();
+        return new self($errors);
     }
 
 
-    // ---- Public Methods ---- //
 
-    private function isArray($array):bool
+
+        public function hasKeys(array|string|int $keys):self
     {
-        return is_array($array);
-    }
-
-
-        public function hasKeys(array|string|int $keys,?array $array=null)
-    {
-        if($array !== null)
-        {
-            return $this->validateKeys($keys,$array);
-        }
-
         if($this->keys !== null){
-            throw new LogicException("Key has already been Set");
+            $this->errors->add("config","method ".__FUNCTION__. " has Already been Set");
         }
-
+        else{
             $this->keys = $keys;
-            return $this;
+        }            
+        return $this;
     }
 
 
-    public function hasValues(array|string|int $values, ?array $array=null)
+    public function hasValues(array|string|int $values):self
     {
-        if($array !== null)
-        {
-            return $this->validateValues($values,$array);
-        }
 
-        if($this->values !== null)
-        {
-            throw new LogicException(" Has Values Method  has already been set");
+      if($this->values !== null){
+            $this->errors->add("config","method ".__FUNCTION__. " has already been Set");
         }
-
-        $this->values = $values;
+     else{
+            $this->values = $values;
+        }            
         return $this;
     }
 
@@ -92,21 +83,20 @@ final class ArrayRules
      */
     public function validate(array $value):bool
     {
-        if(!$this->isArray($value))
-        {
-            throw new LogicException("Validation Failed : Value Must be an array" .gettype($value)." Used");
-        }
 
+        $this->clearErrors();
         if($this->values !== null  && !$this->validateValues($this->values,$value))
         {
-            throw new LogicException("Values :  ". implode(", ",$this->invalidValues) . " is not part of the selected Array");
+            $this->errors->add("logic","Invalid values: " . implode(", ", $this->invalidValues));
         }
 
         if($this->keys !== null  && !$this->validateKeys($this->keys,$value))
         {
-            throw new LogicException("Key or keys : ".implode(", ",$this->invalidKeys)." is not part of the selected Array");
+            $this->errors->add("logic",implode(", ",$this->invalidKeys)." are not part of the valid Key selection");
         }
-        return true;
+
+        return $this->isValid();
+        
     }
 
 
@@ -137,7 +127,7 @@ final class ArrayRules
         return true;
     }
 
-    private function validateValues(array|string|int $values, array $array)
+    private function validateValues(array|string|int $values, array $array):bool
     {
         $this->invalidValues = [];
         if(is_array($values))
@@ -176,6 +166,8 @@ final class ArrayRules
         $this->values = null;
         return $this;
     }
+
+
 
 
 }
