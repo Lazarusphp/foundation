@@ -1,10 +1,11 @@
 <?php
 namespace LazarusPhp\Foundation\Validation;
 
+use LazarusPhp\Foundation\ErrorHandler\Errors;
 
 final class Rules
 {
-    public static function create($classname,?array $errors=null)
+    public static function create($classname,?Errors $errors = null)
     {
         $errors = $errors ?? null;
         if(class_exists($classname))
