@@ -9,7 +9,7 @@ class Errors
 
     public function add(string $key, string $message): void
     {        
-        $this->errors[$key] = $message;
+        $this->errors[$key][] = $message;
     }
 
     public function reset()
