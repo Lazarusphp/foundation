@@ -4,6 +4,7 @@ namespace LazarusPhp\Foundation\Validation;
 
 use Exception;
 use LogicException;
+use LazarusPhp\Foundation\ErrorHandler\Errors;
 
 class IntRules
 {
@@ -14,6 +15,7 @@ class IntRules
     private int|null $maxValue = null;
     private int|null $matchValue = null;
     private int|null $randomValue = null;
+    private Errors $errors;
 
 
 
@@ -21,17 +23,19 @@ class IntRules
 
     // ---- Contructor ---- //
 
-    public function __construct()
+    public function __construct($errors)
     {
+        $this->errors = $error;
         $this->reset();
     }
 
 
     // ---- static Method for Instantiation ---- //
 
-    public static function create()
+    public static function create(?Errors  $errors=null)
     {
-        return new self();
+        $errors  = $errors ?? new Errors();
+        return new self($errors);
     }
 
     public function random(int $min,int $max):int
