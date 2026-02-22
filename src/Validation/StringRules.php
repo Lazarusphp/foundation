@@ -10,23 +10,20 @@ use LazarusPhp\Foundation\Validation\Traits\IntegerTraits;
 
 final class StringRules
 {
-
-    private Errors $errors;
     protected ?StringCases $case = null;
-    use ErrorTrait;
+
     use IntegerTraits;
 
 
     // Prevents Being called as an instance and must be called via Create
-    private function __construct(?Errors $errors=null)
+    private function __construct()
     {
-            $this->errors = $errors ?? new Errors();
+        
     }
 
-    public static function create(?Errors $errors=null)
+    public static function create()
     {
-        $errors = $errors ?? new Errors();
-        return new self($errors);
+        return new self();
     }
 
     public function minLength(string $string, int $min): bool
@@ -43,21 +40,19 @@ final class StringRules
     public function validate(string $string):bool
     {
 
-        $this->errors->reset();
-      
         if ($this->minValue !== null && !$this->minLength($string, $this->minValue)) {
-            $this->errors->add("min","Value $string  does not meet Minimum Requirements of {$this->minValue} Charcters");
+            throw new LogicException("Value $string  does not meet Minimum Requirements of {$this->minValue} Charcters");
         }
 
         // Only enforce max if max < PHP_INT_MAX
         if ($this->maxValue !== null && !$this->maxLength($string, $this->maxValue)) {    
-            $this->errors->add("max","{$string} Exceeds Maxium Required value of {$this->maxValue}");
+            throw new LogicException("{$string} Exceeds Maxium Required value of {$this->maxValue}");
         }
 
    if ($this->minValue !== null && $this->maxValue !== null && $this->minValue > $this->maxValue) {
-    $this->errors->add("config", "Minimum value cannot be larger than Maximum value");
+    throw new LogicException("Minimum value cannot be larger than Maximum value");
 }
-    return $this->isValid();
+    return true;
     }
 
 }

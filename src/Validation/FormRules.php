@@ -13,22 +13,18 @@ class FormRules
     private bool|null $requiredValue = null;
     private string|int|null $matchValue = null;
     private array $requestMethod = [];
-    private Errors $errors;
-    use ErrorTrait;
 
     // ---- Constructor ---- //
 
-    private function __construct($errors)
+    private function __construct()
     {
-        $this->errors = $errors;
         $this->detectMethod();
         $this->reset();
     }
 
-    public static function create(?Errors $errors = null)
+    public static function create()
     {
-        $errors = $errors ?? new Errors();
-        return new self($errors);
+        return new self();
     }
 
     public function matches($input)
@@ -104,7 +100,6 @@ private function validateRequired($input): bool
         }
 
         $this->reset();
-        return $this->isValid();
     }
     public function detectMethod()
     {

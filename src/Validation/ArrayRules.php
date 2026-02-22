@@ -1,14 +1,13 @@
 <?php
 namespace LazarusPhp\Foundation\Validation;
 
+use Exception;
 use LazarusPhp\Foundation\ErrorHandler\Errors;
 use LazarusPhp\Foundation\Validation\Traits\ErrorTrait;
+use LogicException;
 
 final class ArrayRules
 {
-
-    use ErrorTrait;
-    private Errors $errors;
 
 
 // ---- Properties ---- //
@@ -26,9 +25,8 @@ final class ArrayRules
 
     // ---- constructor --- /
 
-    private function __construct($errors)
+    private function __construct()
     {
-        $this->errors = $errors;
         $this->reset();
     }
 
@@ -42,10 +40,9 @@ final class ArrayRules
       * @return self
       */
 
-    public static function create(?Errors $errors = null): self
+    public static function create(): self
     {
-        $errors = $errors ?? new Errors();
-        return new self($errors);
+        return new self();
     }
 
 
@@ -54,7 +51,7 @@ final class ArrayRules
         public function hasKeys(array|string|int $keys):self
     {
         if($this->keys !== null){
-            $this->errors->add("config","method ".__FUNCTION__. " has Already been Set");
+            throw new LogicException("method ".__FUNCTION__. " has Already been Set");
         }
         else{
             $this->keys = $keys;
@@ -67,7 +64,7 @@ final class ArrayRules
     {
 
       if($this->values !== null){
-            $this->errors->add("config","method ".__FUNCTION__. " has already been Set");
+            throw new LogicException("method ".__FUNCTION__. " has already been Set");
         }
      else{
             $this->values = $values;
@@ -84,18 +81,17 @@ final class ArrayRules
     public function validate(array $value):bool
     {
 
-        $this->clearErrors();
         if($this->values !== null  && !$this->validateValues($this->values,$value))
         {
-            $this->errors->add("logic","Invalid values: " . implode(", ", $this->invalidValues));
+            throw new LogicException("Invalid values: " . implode(", ", $this->invalidValues));
         }
 
         if($this->keys !== null  && !$this->validateKeys($this->keys,$value))
         {
-            $this->errors->add("logic",implode(", ",$this->invalidKeys)." are not part of the valid Key selection");
+            throw new LogicException(implode(", ",$this->invalidKeys)." are not part of the valid Key selection");
         }
 
-        return $this->isValid();
+        return true;
         
     }
 

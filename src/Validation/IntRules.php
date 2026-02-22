@@ -14,8 +14,6 @@ class IntRules
     // ---- Properties ---- //
 
     private int|null $matchValue = null;
-    private Errors $errors;
-    use ErrorTrait;
     use IntegerTraits;
 
 
@@ -23,19 +21,17 @@ class IntRules
 
     // ---- Contructor ---- //
 
-    private function __construct($errors)
+    private function __construct()
     {
-        $this->errors = $errors;
         $this->reset();
     }
 
 
     // ---- static Method for Instantiation ---- //
 
-    public static function create(?Errors  $errors=null)
+    public static function create()
     {
-        $errors  = $errors ?? new Errors();
-        return new self($errors);
+        return new self();
     }
 
 
@@ -44,7 +40,7 @@ class IntRules
 
         if($this->matchValue !== null)
         {
-            $this->errors->add("logic","Match Method has Been set ALready");
+            throw new LogicException("Match Method has Been set ALready");
         }
 
         $this->matchValue = $value;
@@ -53,26 +49,25 @@ class IntRules
 
     public function validate(int $value):bool {
         
-        $this->clearErrors();
         $match = $this->matchValue ?? null;
    
         if($this->minValue !== null && !$this->validateMin($this->minValue,$value))
         {
-            $this->errors->add("min","Value : $value is lower than Minumum value $this->minValue");
+            throw new LogicException("Value : $value is lower than Minumum value $this->minValue");
         }
         
 
         if($this->maxValue !== null && !$this->validateMax($this->maxValue,$value))
         {
-            $this->errors->add("max","Value : $value is greater than the Maximum value $this->maxValue");
+            throw new LogicException("Value : $value is greater than the Maximum value $this->maxValue");
         }
 
         if($match !== null && !$this->validateMatch($match,$value))
         {
-            $this->errors->add("match","Value $value does not match expected $match");
+            throw new LogicException("Value $value does not match expected $match");
         }
 
-        return $this->isValid();
+        return true;
        
     }
 
