@@ -72,8 +72,8 @@ final class Resolve
 
     public static function add(string $name,string $path)
     {
-       self::isInitialized();
-       self::isReserverved($name);
+        self::isInitialized();
+        self::isReserverved($name);
         self::getRestrictedPaths($path);      
         self::$map[$name] = self::resolve($path);
     }
